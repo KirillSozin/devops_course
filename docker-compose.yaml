@@ -10,8 +10,23 @@ services:
       - MONGO_CONFIGS_COLLECTION=${MONGO_CONFIGS_COLLECTION}
     depends_on:
       - mongo
+      - builder
     ports:
       - "${SERVER_PORT}:${HOST_PORT}"
+
+  builder:
+    image: builder
+    build:
+      context: .
+      dockerfile: Dockerfile.build
+    depends_on:
+      - system
+
+  system:
+    image: system
+    build:
+      context: .
+      dockerfile: Dockerfile.system
 
   mongo:
     container_name: mongo
