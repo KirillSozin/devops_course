@@ -9,9 +9,27 @@ services:
       - MONGO_DB=${MONGO_DB}
       - MONGO_CONFIGS_COLLECTION=${MONGO_CONFIGS_COLLECTION}
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
+      builder:
+        condition: service_started
     ports:
       - "${SERVER_PORT}:${HOST_PORT}"
+
+  builder:
+    image: builder
+    build:
+      context: .
+      dockerfile: Dockerfile.build
+    depends_on:
+      system:
+        condition: service_started
+
+  system:
+    image: system
+    build:
+      context: .
+      dockerfile: Dockerfile.system
 
   mongo:
     container_name: mongo
@@ -21,6 +39,11 @@ services:
       - MONGO_INITDB_DATABASE=${MONGO_DB}
     volumes:
       - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 30s
+      retries: 3
 
 volumes:
   mongo_data:

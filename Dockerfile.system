@@ -1,0 +1,7 @@
+FROM alpine:3.21.3
+
+RUN apk add --no-cache \
+    go=1.23.8-r0 \
+    make \
+    gcc \
+    musl-dev
